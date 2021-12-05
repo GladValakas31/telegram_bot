@@ -48,7 +48,7 @@ def registration(message):
         return bot.send_message(message.chat.id, 'Некорректная ссылка')
 
     info1 = f'{name} {fam} {patr} {grp} {var} {git}'
-    connection = create_connection("student", "postgres", "89377366098v", "127.0.0.1", "5432")
+    connection = create_connection("", "", "", "", "") # запишите свои данные
     if not check_for_presence_in_db(connection, info1):
         if check_student_program(git):
             res = True
