@@ -20,7 +20,6 @@ def create_connection(db_name, db_user, db_password, db_host, db_port):
         print("Произошла ошибка OperationalError")
     return connection
 
-connection = create_connection("student", "postgres", "89377366098v", "127.0.0.1", "5432")
 
 
 def execute_query(connection, query):
@@ -44,9 +43,6 @@ def execute_query(connection, query):
     except OperationalError:
         print("Произошла ошибка 'OperationalError'")
 
-# execute_query(connection, """UPDATE students
-# SET res = True
-# WHERE fam='Катин' AND name='Георгий' AND patronymic='Иванович' AND grp='312Б' AND var='3' AND git='гитхаб';""")
 
 
 def check_for_presence_in_db(connection, stud):
@@ -80,7 +76,6 @@ def check_for_presence_in_db(connection, stud):
     except OperationalError:
         print("Произошла ошибка OperationalError")
 
-# print(check_for_presence_in_db(connection, 'Катин Георгий Иванович 312Б 3 гитхаб'))
 
 
 def data_recording(connection, fam: str, name: str, patronymic: str, grp: str, var: str, git: str, res: bool) -> None:
@@ -94,7 +89,6 @@ def data_recording(connection, fam: str, name: str, patronymic: str, grp: str, v
     cursor.execute(insert_query)
     connection.commit()
 
-# data_recording(connection, 'Катин', 'Георгий', 'Иванович', '312Б', '3', 'гитхаб', False)
 
 
 def code_check_entry(connection, fam, name, patronymic, grp, var, git):
@@ -125,7 +119,6 @@ def code_check_entry(connection, fam, name, patronymic, grp, var, git):
     except OperationalError:
         print("Произошла ошибка OperationalError")
 
-# print(code_check_entry(connection, 'Катин', 'Георгий', 'Иванович', '312Б', '3', 'гитхаб'))
 
 
 def print_res():
@@ -156,4 +149,3 @@ def print_res():
     except OperationalError:
         print("Произошла ошибка OperationalError")
 
-# print(print_res(connection))
