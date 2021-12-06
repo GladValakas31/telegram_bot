@@ -49,8 +49,8 @@ CREATE TABLE IF NOT EXISTS students (
   fam character(20) NOT NULL,
   name character(20) NOT NULL,
   patronymic character(20) NOT NULL,
-  grp character(20) NOT NULL,
-  var character(20) NOT NULL,
+  grp character(5) NOT NULL,
+  var character(5) NOT NULL,
   git character(100) NOT NULL,
   res boolean NOT NULL
 )
