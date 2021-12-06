@@ -10,7 +10,7 @@ def check_student_program(git: str):
     """
 
     git_student = git
-    git_teacher = 'https://github.com/GladValakas31/unit_test.git'
+    git_teacher = '' # введите ссылку на репозиторий с unittest'ом
 
     start_dir = os.getcwd()
     try:
