@@ -19,7 +19,7 @@ def create_connection(db_name, db_user, db_password, db_host, db_port):
         print("Произошла ошибка OperationalError")
     return connection
 
-connection = create_connection("postgres", "postgres", "89377366098v", "127.0.0.1", "5432")
+connection = create_connection("postgres", "", "", "", "")
 
 def create_database(connection, query):
     connection.autocommit = True
@@ -33,7 +33,7 @@ def create_database(connection, query):
 create_database_query = "CREATE DATABASE student"
 create_database(connection, create_database_query)
 
-connection = create_connection("student", "postgres", "89377366098v", "127.0.0.1", "5432")
+connection = create_connection("", "", "", "", "")
 
 def execute_query(connection, query):
     cursor = connection.cursor()
