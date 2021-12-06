@@ -33,7 +33,7 @@ def create_database(connection, query):
 create_database_query = "CREATE DATABASE student"
 create_database(connection, create_database_query)
 
-connection = create_connection("", "", "", "", "")
+connection = create_connection("students", "", "", "", "")
 
 def execute_query(connection, query):
     cursor = connection.cursor()
