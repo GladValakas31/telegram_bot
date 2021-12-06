@@ -47,8 +47,8 @@ def execute_query(connection, query):
     except OperationalError:
         print("Произошла ошибка")
 
-create_users_table = """
-CREATE TABLE IF NOT EXISTS students (
+create_users_table = f"""
+CREATE TABLE IF NOT EXISTS {DB_NAME} (
   fam character(20) NOT NULL,
   name character(20) NOT NULL,
   patronymic character(20) NOT NULL,
