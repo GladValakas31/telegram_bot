@@ -1,70 +1,153 @@
-# 1) Подключаем БД
-# 2) Проверяем наличие студента в БД
-# 3.1) Если студента нет в БД:
-#     3.1.1) Проверяем его программу.
-#         Если она выполнена верно:
-#             3.1.1.1) Заносим его в БД с записью в столбец res: True
-#         Если работа выполнена неверно:
-#             3.1.1.2) Заносим его в БД с записью в столбец res: False
-# 3.2) Если студент есть в БД:
-#     Если в столбце res запись False:
-#         3.2.1) Проверяем его программу снова
-#             Если программа неверная опять:
-#                 3.2.1.1) Ничего не делаем
-#             Если программа верная:
-#                 3.2.1.2) Меняем запись в таблице res в БД на True
-#     Если в столбце res запись True:
-#         3.2.2) Ничего не делаем
+import psycopg2
+from psycopg2 import OperationalError
 
 
-import telebot
-from database import execute_query, check_for_presence_in_db, data_recording, code_check_entry
-from gitnub_func import check_student_program
-bot = telebot.TeleBot('2139416357:AAEnLQk2oGf-KtHpnFIpD8OldZD8rHS_msU')
+def create_connection(db_name, db_user, db_password, db_host, db_port):
 
-def registration(message):
-    """
-    Функция, осуществляющая проверку правильности введенных данных учеником;
-    Проверяет программу ученика на правильность, записывает ученика с результатом проверки его программы в БД
-    """
+    """Функция, осуществляющая подключение к базе данных"""
 
-    info = message.text.split()
-    if len(info) != 6:
-        return bot.send_message(message.chat.id, 'Нехватка ваших данных')
+    connection = None
     try:
-        fam, name, patr, grp, var, git = info[0].capitalize(), info[1].capitalize(), info[2].capitalize(), info[3], int(info[4]), info[5]
-    except ValueError:
-        return bot.send_message(message.chat.id, 'Некорректная информация')
-    for value in (name, fam, patr):
-        for letter in value:
-            if letter in """0123456789.+/*-,:;'"`!@#$%^&()=/|{}<>?""":
-                return bot.send_message(message.chat.id, 'Некорректное ФИО')
-    groups = ('312Б', '321Б', '314Б')
-    if grp not in groups:
-        return bot.send_message(message.chat.id, 'Некорректная группа')
-    if var < 0 or var > 10:
-        return bot.send_message(message.chat.id, 'Некорректный номер варианта (вариант должен быть от 1 до 9)')
-    if 'https://github.com/' not in git:
-        return bot.send_message(message.chat.id, 'Некорректная ссылка')
+        connection = psycopg2.connect(
+            database=db_name,
+            user=db_user,
+            password=db_password,
+            host=db_host,
+            port=db_port,
+        )
+        print("Подключение к БД осуществлено успешно")
+    except OperationalError:
+        print("Произошла ошибка OperationalError")
+    return connection
 
-    info1 = f'{fam} {name} {patr} {grp} {var} {git}'
-    var = str(var)
-    if not check_for_presence_in_db(info1):
-        if check_student_program(git):
-            res = True
-            data_recording(fam, name, patr, grp, var, git, res)
-            return bot.send_message(message.chat.id, 'Ваша программа прошла проверку, вы записаны в БД')
-        else:
-            res = False
-            data_recording(fam, name, patr, grp, var, git, res)
-            return bot.send_message(message.chat.id, 'Ваша программа не прошла проверку, вы записаны в БД')
-    else:
-        if not code_check_entry(fam, name, patr, grp, var, git):
-            if not check_student_program(git):
-                return bot.send_message(message.chat.id, 'Ваша программа снова не прошла проверку (вы уже были записаны в БД)')
-            else:
-                query = f"""UPDATE students SET res = True WHERE fam='{fam}' AND name='{name}' AND patronymic='{patr}' AND grp='{grp}' AND var='{var}' AND git='{git}';"""
-                execute_query(query)
-                return bot.send_message(message.chat.id, 'Ваша программа прошла проверку, ваши данные перезаписаны в БД')
-        else:
-            return bot.send_message(message.chat.id,'Ваша программа уже была проверена и прошла проверку, также вы уже были записаны в БД')
+
+
+def execute_query(query):
+    """
+    Функция, осуществляющая введение запроса в БД через переменную query.
+    UPDATE students
+    SET res = True
+    WHERE fam='...' AND name='...' AND patronymic='...' AND grp='...' AND var='...'AND git='...';
+    Это запрос для обновления инф-ции в столбце res опеределенного студента
+    :param connection: подключение к БД
+    :param query: запрос в PostrgeSQL
+    :return: None
+    """
+    connection = create_connection("student", "postgres", "89377366098v", "127.0.0.1", "5432")
+    cursor = connection.cursor()
+    try:
+        cursor.execute(query)
+        connection.commit()
+        print("Запрос query выполнено успешно")
+    except OperationalError:
+        print("Произошла ошибка 'OperationalError'")
+
+
+
+def check_for_presence_in_db(stud):
+    """
+    Функция, проверяющая, есть ли студент в БД.
+    :param connection: подключение к БД
+    :param stud: это пермемнная вида: 'Имя Фамилия Отчество Группа Вариант Гитхаб'
+    :return: True, если студент есть в БД и False, если его там нет или если БД пустая
+    """
+
+    connection = create_connection("student", "postgres", "89377366098v", "127.0.0.1", "5432")
+    cursor = connection.cursor()
+    result = None
+    try:
+        cursor.execute('SELECT * FROM students')
+        result = cursor.fetchall()
+        if len(result) == 0:
+            return False
+        total = []
+        for user in result:
+            user = list(user)
+            total1 = []
+            for val in user:
+                if isinstance(val, bool):
+                    continue
+                total1.append(val.strip())
+            total.append(total1)
+        for st in total:
+            if ' '.join(st) == stud:
+                return True
+        return False
+    except OperationalError:
+        print("Произошла ошибка OperationalError")
+
+
+
+
+
+def data_recording(fam: str, name: str, patronymic: str, grp: str, var: str, git: str, res: bool) -> None:
+
+    """Функция, осуществляющая запись ученика в БД, ничего не возвращает"""
+
+    connection = create_connection("student", "postgres", "89377366098v", "127.0.0.1", "5432")
+    insert_query = (f"INSERT INTO students (fam, name, patronymic, grp, var, git, res) VALUES ('{fam}', '{name}', '{patronymic}', '{grp}', '{var}', '{git}', {res})")
+
+    cursor = connection.cursor()
+    cursor.execute(insert_query)
+    connection.commit()
+
+# data_recording('Базанов', 'Илья', 'Алексеевич', '312Б', '3', 'https://github.com/GladValakas31/student_programm.git', False)
+
+def code_check_entry(fam, name, patronymic, grp, var, git):
+
+    """
+    Функция, проверяющая значение столбца res у определенного студента
+    :return: значение столбца res (True или False)
+    """
+    connection = create_connection("student", "postgres", "89377366098v", "127.0.0.1", "5432")
+    cursor = connection.cursor()
+    result = None
+    try:
+        cursor.execute('SELECT * FROM students')
+        result = cursor.fetchall()
+        total = []
+        for user in result:
+            user = list(user)
+            total1 = []
+            for val in user:
+                if isinstance(val, bool):
+                    total1.append(val)
+                else:
+                    total1.append(val.strip())
+            total.append(total1)
+        for stud in total:
+            if stud[0] == fam and stud[1] == name and stud[2] == patronymic and stud[3] == grp and stud[4] == var and stud[5] == git:
+                return stud[6]
+    except OperationalError:
+        print("Произошла ошибка OperationalError")
+
+# print(code_check_entry("Базанов", "Илья", "Алексеевич", '321Б', '4', 'https://github.com/GladValakas31/student_programm.git'))
+
+def print_res():
+    """
+    Функция, осуществляющая вывод всех учеников
+    :param connection: Подключение к БД
+    :return: Возвращает всех учеников из БД
+    """
+    connection = create_connection("student", "postgres", "89377366098v", "127.0.0.1", "5432")
+    cursor = connection.cursor()
+    result = None
+    try:
+        cursor.execute('SELECT * FROM students')
+        result = cursor.fetchall()
+        total = []
+        for user in result:
+            user = list(user)
+            total1 = []
+            for val in user:
+                if isinstance(val, bool):
+                    continue
+                else:
+                    total1.append(val.strip())
+            total.append(total1[:-1])
+        result = ''
+        for value in total:
+            result += ' '.join(value) + "\n"
+        return result
+    except OperationalError:
+        print("Произошла ошибка OperationalError")
