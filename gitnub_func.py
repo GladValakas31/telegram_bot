@@ -45,5 +45,3 @@ def check_student_program(git: str):
     if finish_test_values == finish_test_calc == 0:
         return True
     return False
-
-# print(check_student_program('https://github.com/GladValakas31/student_programm.git'))
