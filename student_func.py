@@ -1,7 +1,9 @@
 import telebot
 from database import execute_query, check_for_presence_in_db, data_recording, code_check_entry
 from gitnub_func import check_student_program
-bot = telebot.TeleBot('') # введите свое значение токена телеграм бота
+from config import TOKEN
+
+bot = telebot.TeleBot(TOKEN)
 
 def registration(message):
     """
