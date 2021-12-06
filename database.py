@@ -32,7 +32,7 @@ def execute_query(query):
     :param query: запрос в PostrgeSQL
     :return: None
     """
-    connection = create_connection("student", "postgres", "89377366098v", "127.0.0.1", "5432")
+    connection = create_connection("", "", "", "", "") # введите свои значения для подключения к БД
     cursor = connection.cursor()
     try:
         cursor.execute(query)
@@ -50,7 +50,7 @@ def check_for_presence_in_db(stud):
     :return: True, если студент есть в БД и False, если его там нет или если БД пустая
     """
 
-    connection = create_connection("student", "postgres", "89377366098v", "127.0.0.1", "5432")
+    connection = create_connection("", "", "", "", "") # введите свои значения для подключения к БД
     cursor = connection.cursor()
     result = None
     try:
@@ -82,7 +82,7 @@ def data_recording(fam: str, name: str, patronymic: str, grp: str, var: str, git
 
     """Функция, осуществляющая запись ученика в БД, ничего не возвращает"""
 
-    connection = create_connection("student", "postgres", "89377366098v", "127.0.0.1", "5432")
+    connection = create_connection("", "", "", "", "") # введите свои значения для подключения к БД
     insert_query = (f"INSERT INTO students (fam, name, patronymic, grp, var, git, res) VALUES ('{fam}', '{name}', '{patronymic}', '{grp}', '{var}', '{git}', {res})")
 
     cursor = connection.cursor()
@@ -96,7 +96,7 @@ def code_check_entry(fam, name, patronymic, grp, var, git):
     Функция, проверяющая значение столбца res у определенного студента
     :return: значение столбца res (True или False)
     """
-    connection = create_connection("student", "postgres", "89377366098v", "127.0.0.1", "5432")
+    connection = create_connection("", "", "", "", "") # введите свои значения для подключения к БД
     cursor = connection.cursor()
     result = None
     try:
@@ -124,7 +124,7 @@ def print_res():
     Функция, осуществляющая вывод всех учеников
     :return: Возвращает всех учеников из БД
     """
-    connection = create_connection("student", "postgres", "89377366098v", "127.0.0.1", "5432")
+    connection = create_connection("", "", "", "", "") # введите свои значения для подключения к БД
     cursor = connection.cursor()
     result = None
     try:
