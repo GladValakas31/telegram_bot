@@ -1,5 +1,6 @@
 import psycopg2
 from psycopg2 import OperationalError
+from config import DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT
 
 def create_connection(db_name, db_user, db_password, db_host, db_port):
 
@@ -19,7 +20,9 @@ def create_connection(db_name, db_user, db_password, db_host, db_port):
         print("Произошла ошибка OperationalError")
     return connection
 
-connection = create_connection("postgres", "", "", "", "")
+
+connection = create_connection('postgres', DB_USER, DB_PASSWORD, DB_HOST, DB_PORT)
+
 
 def create_database(connection, query):
     connection.autocommit = True
@@ -33,7 +36,7 @@ def create_database(connection, query):
 create_database_query = "CREATE DATABASE student"
 create_database(connection, create_database_query)
 
-connection = create_connection("students", "", "", "", "")
+connection = create_connection(DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT)
 
 def execute_query(connection, query):
     cursor = connection.cursor()
@@ -49,8 +52,8 @@ CREATE TABLE IF NOT EXISTS students (
   fam character(20) NOT NULL,
   name character(20) NOT NULL,
   patronymic character(20) NOT NULL,
-  grp character(5) NOT NULL,
-  var character(5) NOT NULL,
+  grp character(20) NOT NULL,
+  var character(20) NOT NULL,
   git character(100) NOT NULL,
   res boolean NOT NULL
 )
