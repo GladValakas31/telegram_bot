@@ -1,5 +1,6 @@
 import os
 import shutil
+from config import TEACHER_GIT
 
 def check_student_program(git: str):
 
@@ -10,7 +11,7 @@ def check_student_program(git: str):
     """
 
     git_student = git
-    git_teacher = '' # введите ссылку на репозиторий с unittest'ом
+    git_teacher = TEACHER_GIT
 
     start_dir = os.getcwd()
     try:
