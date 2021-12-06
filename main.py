@@ -1,8 +1,9 @@
 import telebot
 from student_func import registration
 from database import print_res
+from config import TOKEN
 
-bot = telebot.TeleBot('') # введите токен своего телеграм бота
+bot = telebot.TeleBot(TOKEN)
 
 @bot.message_handler(commands=['start'])
 def get_information(message):
