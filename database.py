@@ -1,7 +1,15 @@
 import psycopg2
 from psycopg2 import OperationalError
 from config import DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT
+import logging
 
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s - [%(levelname)s] - %(name)s - (%(filename)s).%(funcName)s(%(lineno)d) - %(message)s",
+    filename='logger.log'
+)
+
+logger = logging.getLogger(__name__)
 
 def create_connection(db_name, db_user, db_password, db_host, db_port):
 
@@ -16,9 +24,9 @@ def create_connection(db_name, db_user, db_password, db_host, db_port):
             host=db_host,
             port=db_port,
         )
-        print("Подключение к БД осуществлено успешно")
+        logger.info('Connection to the database was successful')
     except OperationalError:
-        print("Произошла ошибка OperationalError")
+        logger.error('An OperationalError occurred')
     return connection
 
 
@@ -38,9 +46,9 @@ def execute_query(query):
     try:
         cursor.execute(query)
         connection.commit()
-        print("Запрос query выполнено успешно")
+        logger.info('The database was created successfully')
     except OperationalError:
-        print("Произошла ошибка 'OperationalError'")
+        logger.error('An OperationalError occurred')
 
 
 
@@ -52,6 +60,7 @@ def check_for_presence_in_db(stud):
     """
 
     connection = create_connection(DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT)
+    logger.info('The connection to the database was successful')
     cursor = connection.cursor()
     result = None
     try:
@@ -68,12 +77,13 @@ def check_for_presence_in_db(stud):
                     continue
                 total1.append(val.strip())
             total.append(total1)
+        logger.info('The function worked successfully')
         for st in total:
             if ' '.join(st) == stud:
                 return True
         return False
     except OperationalError:
-        print("Произошла ошибка OperationalError")
+        logger.error('An OperationalError occurred')
 
 
 
@@ -84,11 +94,13 @@ def data_recording(fam: str, name: str, patronymic: str, grp: str, var: str, git
     """Функция, осуществляющая запись ученика в БД, ничего не возвращает"""
 
     connection = create_connection(DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT)
+    logger.info('The connection to the database was successful')
     insert_query = (f"INSERT INTO students (fam, name, patronymic, grp, var, git, res) VALUES ('{fam}', '{name}', '{patronymic}', '{grp}', '{var}', '{git}', {res})")
 
     cursor = connection.cursor()
     cursor.execute(insert_query)
     connection.commit()
+    logger.info('The function worked successfully')
 
 
 def code_check_entry(fam, name, patronymic, grp, var, git):
@@ -113,11 +125,12 @@ def code_check_entry(fam, name, patronymic, grp, var, git):
                 else:
                     total1.append(val.strip())
             total.append(total1)
+        logger.info('The function worked successfully')
         for stud in total:
             if stud[0] == fam and stud[1] == name and stud[2] == patronymic and stud[3] == grp and stud[4] == var and stud[5] == git:
                 return stud[6]
     except OperationalError:
-        print("Произошла ошибка OperationalError")
+        logger.error('An OperationalError occurred')
 
 
 def print_res():
@@ -126,6 +139,7 @@ def print_res():
     :return: Возвращает всех учеников из БД
     """
     connection = create_connection(DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT)
+    logger.info('The connection to the database was successful')
     cursor = connection.cursor()
     result = None
     try:
@@ -141,9 +155,10 @@ def print_res():
                 else:
                     total1.append(val.strip())
             total.append(total1[:-1])
+        logger.info('The function worked successfully')
         result = ''
         for value in total:
             result += ' '.join(value) + "\n"
         return result
     except OperationalError:
-        print("Произошла ошибка OperationalError")
+        logger.error('An OperationalError occurred')
