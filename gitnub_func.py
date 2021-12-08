@@ -1,6 +1,15 @@
 import os
 import shutil
 from config import TEACHER_GIT
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s - [%(levelname)s] - %(name)s - (%(filename)s).%(funcName)s(%(lineno)d) - %(message)s",
+    filename='logger.log'
+)
+
+logger = logging.getLogger(__name__)
 
 def check_student_program(git: str):
 
@@ -19,9 +28,11 @@ def check_student_program(git: str):
         dir = os.path.join(os.getcwd(), 'TestingStudentProgram')
         os.mkdir('TestingStudentProgram')
         os.mkdir(dir)
+        logger.info('TestingStudentProgram folder was successfully created')
     except FileExistsError:
         os.system(f'rd /s /q "{dir}"')
         os.mkdir(dir)
+        logger.debug('FileExistsError occured, file recreated successfully')
 
     os.chdir(dir)
     os.system(f'git clone {git_student}')
@@ -43,6 +54,7 @@ def check_student_program(git: str):
     finish_test_calc = os.system('python -m unittest main_test.TestCalc.test_calc')
     finish_test_values = os.system('python -m unittest main_test.TestCalc.test_values')
     os.chdir(start_dir)
+    logger.info('The function worked successfully')
     if finish_test_values == finish_test_calc == 0:
         return True
     return False
