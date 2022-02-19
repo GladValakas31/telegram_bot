@@ -1,9 +1,10 @@
 import telebot
-from database import execute_query, check_for_presence_in_db, data_recording, code_check_entry
+from database import execute_query, check_for_presence_in_db_and_code_check_entry
 from gitnub_func import check_student_program
 from config import TOKEN
 
 bot = telebot.TeleBot(TOKEN)
+
 
 def registration(message):
     """
@@ -11,16 +12,18 @@ def registration(message):
     Проверяет программу ученика на правильность, записывает ученика с результатом проверки его программы в БД
     """
 
+    # Проверка на правильность ввода данных
     info = message.text.split()
     if len(info) != 6:
         return bot.send_message(message.chat.id, 'Нехватка ваших данных')
     try:
-        fam, name, patr, grp, var, git = info[0].capitalize(), info[1].capitalize(), info[2].capitalize(), info[3], int(info[4]), info[5]
+        fam, name, patr, grp, var, git = info[0].capitalize(), info[1].capitalize(), info[2].capitalize(), info[3], \
+                                         int(info[4]), info[5]
     except ValueError:
         return bot.send_message(message.chat.id, 'Некорректная информация')
     for value in (name, fam, patr):
         for letter in value:
-            if letter in """0123456789.+/*-,:;'"`!@#$%^&()=/|{}<>?""":
+            if not letter.isalpha():
                 return bot.send_message(message.chat.id, 'Некорректное ФИО')
     groups = ('312Б', '321Б', '314Б')
     if grp not in groups:
@@ -30,24 +33,27 @@ def registration(message):
     if 'https://github.com/' not in git:
         return bot.send_message(message.chat.id, 'Некорректная ссылка')
 
-    info1 = f'{fam} {name} {patr} {grp} {var} {git}'
+    # Вызов функций базы данных и проверки программы студента
     var = str(var)
-    if not check_for_presence_in_db(info1):
+    if check_for_presence_in_db_and_code_check_entry(fam, name, patr, grp, var, git) is None:
         if check_student_program(git):
-            res = True
-            data_recording(fam, name, patr, grp, var, git, res)
+            execute_query(
+                f"SELECT data_recording('{fam}', '{name}', '{patr}', '{grp}', '{var}', '{git}');")
             return bot.send_message(message.chat.id, 'Ваша программа прошла проверку, вы записаны в БД')
         else:
             res = False
-            data_recording(fam, name, patr, grp, var, git, res)
+            execute_query(
+                f"SELECT data_recording('{fam}', '{name}', '{patr}', '{grp}', '{var}', '{git}', '{res}');")
             return bot.send_message(message.chat.id, 'Ваша программа не прошла проверку, вы записаны в БД')
-    else:
-        if not code_check_entry(fam, name, patr, grp, var, git):
+    elif check_for_presence_in_db_and_code_check_entry(fam, name, patr, grp, var, git) is not None:
+        if check_for_presence_in_db_and_code_check_entry(fam, name, patr, grp, var, git) is False:
             if not check_student_program(git):
-                return bot.send_message(message.chat.id, 'Ваша программа снова не прошла проверку (вы уже были записаны в БД)')
+                return bot.send_message(message.chat.id,
+                                        'Ваша программа снова не прошла проверку (вы уже были записаны в БД)')
             else:
-                query = f"""UPDATE students SET res = True WHERE fam='{fam}' AND name='{name}' AND patronymic='{patr}' AND grp='{grp}' AND var='{var}' AND git='{git}';"""
-                execute_query(query)
-                return bot.send_message(message.chat.id, 'Ваша программа прошла проверку, ваши данные перезаписаны в БД')
-        else:
-            return bot.send_message(message.chat.id,'Ваша программа уже была проверена и прошла проверку, также вы уже были записаны в БД')
+                execute_query(f"SELECT update_student_result('{fam}', '{name}', '{patr}', '{grp}', '{var}', '{git}');")
+                return bot.send_message(message.chat.id,
+                                        'Ваша программа прошла проверку, ваши данные перезаписаны в БД')
+        elif check_for_presence_in_db_and_code_check_entry(fam, name, patr, grp, var, git) is True:
+            return bot.send_message(message.chat.id,
+                                    'Ваша программа уже была проверена и прошла проверку, также вы уже были записаны в БД')
