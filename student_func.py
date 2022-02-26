@@ -45,15 +45,14 @@ def registration(message):
             execute_query(
                 f"SELECT data_recording('{fam}', '{name}', '{patr}', '{grp}', '{var}', '{git}', '{res}');")
             return bot.send_message(message.chat.id, 'Ваша программа не прошла проверку, вы записаны в БД')
-    elif check_for_presence_in_db_and_code_check_entry(fam, name, patr, grp, var, git) is not None:
-        if check_for_presence_in_db_and_code_check_entry(fam, name, patr, grp, var, git) is False:
-            if not check_student_program(git):
-                return bot.send_message(message.chat.id,
-                                        'Ваша программа снова не прошла проверку (вы уже были записаны в БД)')
-            else:
-                execute_query(f"SELECT update_student_result('{fam}', '{name}', '{patr}', '{grp}', '{var}', '{git}');")
-                return bot.send_message(message.chat.id,
-                                        'Ваша программа прошла проверку, ваши данные перезаписаны в БД')
-        elif check_for_presence_in_db_and_code_check_entry(fam, name, patr, grp, var, git) is True:
+    elif check_for_presence_in_db_and_code_check_entry(fam, name, patr, grp, var, git) is False:
+        if not check_student_program(git):
             return bot.send_message(message.chat.id,
-                                    'Ваша программа уже была проверена и прошла проверку, также вы уже были записаны в БД')
+                                    'Ваша программа снова не прошла проверку (вы уже были записаны в БД)')
+        else:
+            execute_query(f"SELECT update_student_result('{fam}', '{name}', '{patr}', '{grp}', '{var}', '{git}');")
+            return bot.send_message(message.chat.id,
+                                    'Ваша программа прошла проверку, ваши данные перезаписаны в БД')
+    else:
+        return bot.send_message(message.chat.id,
+                                'Ваша программа уже была проверена и прошла проверку, также вы уже были записаны в БД')
